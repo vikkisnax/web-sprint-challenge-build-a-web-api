@@ -1,6 +1,9 @@
 // importing a CommonJS module
-const express = require('express'); 
+const express = require('express');
 const server = express();
+
+//Global MW - Configure your server here -- remember express by default cannot parse JSON in request bodies, so use this code 
+server.use(express.json());
 
 //middleware - to run it every time - like a timestamp
 const { logger } = require ('./actions/actions-middlware');
@@ -13,17 +16,13 @@ const actionsRouter = require ('./actions/actions-router');
 const projectsRouter = require ('./projects/projects-router');
 
 //ENDPOINTS - write in their own files -- w/e route/endpoint starts with this will go to there 
+server.use('/api/projects', projectsRouter);
 // server.use('/api/actions', actionsRouter);
-// server.use('/api/projects', projectsRouter);
 
 //dummy test endpoint - http :9000
 server.get('/', (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
 });
-
-
-//Global MW - Configure your server here -- remember express by default cannot parse JSON in request bodies, so use this code 
-server.use(express.json());
 
 server.use('*', (req, res) => {
   // catch all 404 errors middleware
