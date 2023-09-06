@@ -5,7 +5,7 @@ const Projects = require('./projects-model');
 
 async function validateProjectId(req, res, next){
     try{
-        console.log('req.params.id:', req.params.id)
+        // console.log('req.params.id: validateProjectId', req.params.id)
         const projects = await Projects.get(req.params.id)
         if (!projects){
             next({
@@ -26,17 +26,15 @@ function validateProjectName(req, res, next){
     // console.log('LOOK', req.body)
     const { name } = req.body;
     if (!name || !name.trim()){
-        next({
-            status: 400,
-            message: "missing name field"
-        })
+    next({
+        status: 400,
+        message: "missing name field"
+    })
     } else {
         req.name = name.trim()
         next()
     }
 }
-
-
 function validateProjectInfo(req, res, next){
     const { description } = req.body;
     if (!description || !description.trim()){
@@ -49,9 +47,22 @@ function validateProjectInfo(req, res, next){
         next()
     }
 }
+function validateProjectComplete(req, res, next){
+    if (!validateProjectName && !validateProjectInfo){
+    next({
+        status: 400,
+        message: "MW: missing COMPLETED field",
+        // completed: false
+    })
+    } else {
+        req.completed = true
+        next()
+    }
+}
 
 module.exports = {
     validateProjectId,
     validateProjectName,
-    validateProjectInfo
+    validateProjectInfo,
+    validateProjectComplete
 }

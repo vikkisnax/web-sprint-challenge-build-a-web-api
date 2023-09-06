@@ -16,8 +16,8 @@ const actionsRouter = require ('./actions/actions-router');
 const projectsRouter = require ('./projects/projects-router');
 
 //ENDPOINTS - write in their own files -- w/e route/endpoint starts with this will go to there 
+server.use('/api/actions', actionsRouter);
 server.use('/api/projects', projectsRouter);
-// server.use('/api/actions', actionsRouter);
 
 //dummy test endpoint - http :9000
 server.get('/', (req, res) => {

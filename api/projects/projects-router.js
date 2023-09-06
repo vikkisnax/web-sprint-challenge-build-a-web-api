@@ -4,16 +4,18 @@ const express = require('express');
 //models
 const Projects = require('./projects-model');
 
+const router = express.Router();
+
 //mw
 const { 
     validateProjectId,
     validateProjectName,
-    validateProjectInfo
+    validateProjectInfo,
+    validateProjectComplete
 } = require ('./projects-middleware');
 
-const router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/', validateProjectComplete, (req, res, next) => {
     // RETURN AN ARRAY WITH ALL THE PROJECTS (without their action posts)
     Projects.get()
         .then(projects => {
@@ -26,34 +28,33 @@ router.get('/:id', validateProjectId, (req, res) => {
     //Returns the project object - a project with the given id as the body of the response. - (project with their action posts)
     // this needs a middleware to verify user id
     // console.log(req.projects)
-    res.json(req.projects)
-    
+    res.json(req.projects) 
 })
 
-router.post('/', validateProjectName, validateProjectInfo, (req, res, next) => {
-    //Returns the newly created project obj as the body of the response.
-    //this needs a middleware to check that the request body is valid
-    // need req.name and req.info?
+router.post('/', validateProjectName, validateProjectInfo, validateProjectComplete, (req, res, next) => {
+    //Returns the newly created project obj as the body of the response -- // this needs a middleware to check that the request body is valid
     // console.log(req.name)
     // next()
     Projects.insert({
-        name: req.name,
-        description: req.description
+        name: req.name, 
+        description: req.description,
+        completed: req.completed
     })
     .then(newProject => {
-        // throw new Error('ouch')
-        res.status(201).json(newProject)
+        // console.log('newProject:', newProject)
+        res.status(201).json(newProject);
     })
     .catch(next)
 })
 
-router.put('/:id', validateProjectId, validateProjectName, validateProjectInfo, (req, res, next) => {
+router.put('/:id', validateProjectName, validateProjectInfo, validateProjectComplete, (req, res, next) => {
     //Returns the updated project obj as the body of the response.
-    Projects.update(req.params.id, { name: req.name, description: req.description})
+    Projects.update(req.params.id, { name: req.name, description: req.description,completed: req.completed})
         .then(()=>{
             return Projects.get(req.params.id)
         })
         .then(project=>{
+            console.log('project:', project)
             res.json(project)
         })
         .catch(next)
