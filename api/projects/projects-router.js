@@ -15,7 +15,7 @@ const {
 } = require ('./projects-middleware');
 
 
-router.get('/', validateProjectComplete, (req, res, next) => {
+router.get('/', (req, res, next) => {
     // RETURN AN ARRAY WITH ALL THE PROJECTS (without their action posts)
     Projects.get()
         .then(projects => {
@@ -43,22 +43,33 @@ router.post('/', validateProjectName, validateProjectInfo, validateProjectComple
     .then(newProject => {
         // console.log('newProject:', newProject)
         res.status(201).json(newProject);
-    })
+})
     .catch(next)
 })
 
-router.put('/:id', validateProjectName, validateProjectInfo, validateProjectComplete, (req, res, next) => {
-    //Returns the updated project obj as the body of the response.
-    Projects.update(req.params.id, { name: req.name, description: req.description,completed: req.completed})
-        .then(()=>{
-            return Projects.get(req.params.id)
-        })
-        .then(project=>{
-            console.log('project:', project)
-            res.json(project)
-        })
-        .catch(next)
-})
+router.put('/:id', async (req, res, next) => {
+    const { id } = req.params;
+    const { name, description, completed } = req.body; 
+  
+    if (!name || !description || typeof completed !== 'boolean') {
+        return res.status(400).json({ error: 'Missing or invalid request body fields' });
+    }
+
+    try {
+      // Update the project and fetch the updated project in a single step
+      const updatedProject = await Projects.update(id, { name, description, completed });
+  
+      if (updatedProject) {
+        res.status(200).json(updatedProject); // Respond with the updated project
+      } else {
+        res.status(404).json({ message: 'Project not found' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Error updating project' });
+      next()
+    }
+  });
+  
 
 router.delete('/:id', validateProjectId, async (req, res, next) => {
     //Returns no response body.

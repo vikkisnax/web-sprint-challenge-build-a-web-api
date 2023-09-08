@@ -34,19 +34,19 @@ function logger(req, res, next) {
     }
 }
 
-//project_id	?? can i use the projects mw?
+//project_id
 //number	
 //required, must be the id of an existing project
 function validateProjectsId(req, res, next){
     // console.log('LOOK', req.body)
     const { projectId } = req.body;
-    if (!projectId || !projectId.trim()){
+    if (!projectId && projectId == validateActionsId){
     next({
         status: 400,
-        message: "missing name field"
+        message: "missing project_id field"
     })
     } else {
-        req.name = projectId.trim()
+        req.project_id = projectId
         next()
     }
 }
@@ -71,11 +71,22 @@ function validateActionsNotes(req, res, next){
             message: "missing notes field"
         })
     } else {
-        req.description = notes.trim()
+        req.notes = notes.trim()
         next()
     }
 }
-
+function validateActionComplete(req, res, next){
+    if (!validateProjectsId && !validateActionsInfo){
+    next({
+        status: 400,
+        message: "MW: missing COMPLETED field",
+        // completed: false
+    })
+    } else {
+        req.completed = true
+        next()
+    }
+}
 
 
 
@@ -84,5 +95,6 @@ function validateActionsNotes(req, res, next){
     validateActionsId,
     validateProjectsId,
     validateActionsInfo,
-    validateActionsNotes
+    validateActionsNotes,
+    validateActionComplete
   } 

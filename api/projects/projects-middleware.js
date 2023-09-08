@@ -48,15 +48,16 @@ function validateProjectInfo(req, res, next){
     }
 }
 function validateProjectComplete(req, res, next){
-    if (!validateProjectName && !validateProjectInfo){
-    next({
-        status: 400,
-        message: "MW: missing COMPLETED field",
-        // completed: false
-    })
-    } else {
+    if (req.description && req.name){
         req.completed = true
         next()
+        
+    } else {
+        next({
+            status: 400,
+            message: "MW: missing COMPLETED field",
+            // completed: false
+        })
     }
 }
 
